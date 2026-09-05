@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import apiRoutes from './routes/index.js';
 
 const app = express();
 
@@ -12,5 +13,7 @@ app.get('/api/health', (_req, res) => {
     message: 'Backend running successfully'
   });
 });
+
+app.use('/api', apiRoutes);
 
 export default app;
