@@ -24,7 +24,7 @@ export async function getOpportunities(req: Request, res: Response) {
                 fuenteDatos: source,
                 totalProductos: processed.length,
             },
-            catalog: processed,
+            catalogo: processed,
             top3Oportunidad: top3Opportunities,
         });
     } catch (err) {
