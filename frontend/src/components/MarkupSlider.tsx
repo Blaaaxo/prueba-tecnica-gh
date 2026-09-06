@@ -14,23 +14,36 @@ export function MarkupSlider({ markup, onMarkupChange }: MarkupSliderProps) {
     };
 
     return (
-        <div className="w-full max-w-md">
-            <div className="mb-2">
-                <span className="text-sm text-muted-foreground">Margen comercial (markup)</span>
-                <div className="text-3xl font-bold">{markupPorcentaje}%</div>
+        <div className="w-full">
+            <div className="flex items-center justify-between gap-6 mb-3">
+                <div className="min-w-0">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-blue">
+                        Control global
+                    </p>
+                    <span className="block text-xs text-muted-foreground mt-1">
+                        Margen comercial (markup) sobre costo COP · cambia todos los gráficos en tiempo real
+                    </span>
+                </div>
+                <div className="flex-none text-right">
+                    <div className="font-heading text-3xl md:text-4xl font-bold leading-none text-foreground tabular-nums">
+                        {markupPorcentaje}<span className="text-blue text-xl md:text-2xl">%</span>
+                    </div>
+                </div>
             </div>
 
-            <Slider
-                value={[markupPorcentaje]}
-                onValueChange={handleValueChange}
-                min={10}
-                max={50}
-                step={1}
-            />
+            <div className="[&_[data-slot=slider-track]]:bg-muted [&_[data-slot=slider-range]]:bg-blue">
+                <Slider
+                    value={[markupPorcentaje]}
+                    onValueChange={handleValueChange}
+                    min={10}
+                    max={50}
+                    step={1}
+                />
+            </div>
 
-            <div className="flex justify-between mt-1 text-xs text-muted-foreground">
-                <span>10%</span>
-                <span>50%</span>
+            <div className="flex justify-between mt-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground tabular-nums">
+                <span>10% — Conservador</span>
+                <span>50% — Agresivo</span>
             </div>
         </div>
     );
