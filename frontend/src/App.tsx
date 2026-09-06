@@ -2,6 +2,7 @@ import './App.css';
 import { useCatalog } from './hooks/useCatalog';
 import { useMarkupSimulation } from './hooks/useMarkupSimulation';
 import { MarkupSlider } from './components/MarkupSlider';
+import { CategoryGrid } from './components/CategoryGrid';
 
 function App() {
     const { catalogoBase, loading, error, fuenteDatos } = useCatalog();
@@ -41,9 +42,12 @@ function App() {
                 <MarkupSlider markup={markup} onMarkupChange={setMarkup} />
             </section>
 
-            <pre className="mt-8 text-xs text-muted-foreground">
-                {JSON.stringify(catalogoRecalculado.slice(0, 1), null, 2)}
-            </pre>
+            <section className="mb-10">
+                <h2 className="text-xl font-semibold mb-4">Resumen por categoría</h2>
+                <CategoryGrid products={catalogoRecalculado} />
+            </section>
+
+
         </div>
     );
 }
