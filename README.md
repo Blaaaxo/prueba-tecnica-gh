@@ -66,22 +66,16 @@ El parámetro `markup` es opcional. Rango permitido: `0.10` a `0.50` (10%–50%)
 
 En un entorno de producción real, la estrategia ideal sería usar **Redis** como capa de caché centralizada, en vez de depender de la memoria del propio proceso de Node.js. Esto da más control sobre el tiempo de vida de los datos, permite invalidar la caché manualmente si es necesario, y desacopla el estado de caché del ciclo de vida del servidor (si el proceso se reinicia, los datos cacheados en Redis persisten).
 
-Para el alcance de este MVP, implementé una versión simplificada de esa misma idea, en dos capas dentro de `fakeStore.service.ts`:
+Para el alcance de este MVP, implementé una versión simplificada de esa misma idea, en dos capas dentro de `backend/src/services/fakeStore.service.ts`:
 
 1. **Caché en memoria con `node-cache`, TTL de 10 minutos.** La primera petición a cualquiera de los dos endpoints consulta `fakestoreapi.com`; las siguientes, mientras la caché esté vigente, se sirven desde memoria sin volver a golpear la API externa. Diez minutos es suficiente para un catálogo que no cambia con frecuencia, y evita que cada interacción del usuario en el frontend (recargar la página, por ejemplo) dispare una llamada nueva.
 
-2. **Snapshot persistido en disco** (`src/data/fallback-snapshot.json`): cada vez que una llamada en vivo tiene éxito, el backend sobrescribe este archivo. Esto no es solo una optimización de rendimiento — es la base de la estrategia de continuidad del negocio (siguiente punto).
+2. **Snapshot persistido en disco** (`backend/src/data/fallback-snapshot.json`): cada vez que una llamada en vivo tiene éxito, el backend sobrescribe este archivo. Esto no es solo una optimización de rendimiento, sino también la base de la estrategia de continuidad del negocio.
 
 Migrar de `node-cache` a Redis en el futuro sería un cambio de bajo esfuerzo: la lógica de "revisar caché → si no existe, buscar en vivo → guardar en caché" se mantendría igual, solo cambiaría la implementación del cliente de caché.
 
-### Continuidad del Negocio: si la API de fakestoreapi.com se cae en medio de una presentación a la junta directiva, ¿qué estrategia técnica de contingencia usarías para que nuestro Dashboard no quede en blanco?
+### Continuidad del negocio: si la API de fakestoreapi.com se cae en medio de una presentación a la junta directiva, ¿qué estrategia técnica de contingencia usarías para que el Dashboard no quede en blanco?
 
-Implementaría una estrategia de **fallback mediante una capa de caché**, utilizando tecnologías como **Redis, Memcached o una caché administrada en la nube** para conservar el último catálogo válido.
+En producción implementaría un mecanismo de **fallback** respaldado por una caché persistente, como Redis, y un **Circuit Breaker** para evitar llamadas repetidas mientras la API externa esté fallando. El Dashboard indicaría que está mostrando datos de respaldo y la fecha de su última actualización. También utilizaría una base de datos persistente para conservar el último catálogo válido ante reinicios o pérdida de la caché.
 
-Si `fakestoreapi.com` deja de estar disponible, el backend detectaría el fallo mediante un mecanismo **Circuit Breaker** y utilizaría temporalmente los datos almacenados en caché, evitando que el Dashboard quede en blanco.
-
-La interfaz indicaría que se están mostrando datos de respaldo y su última fecha de actualización.
-
-Para producción, complementaría la caché con una **base de datos persistente** para conservar el último catálogo válido ante reinicios o pérdida de la caché.
-
-Pero en el caso del MVP utilicé una implementación más simple y adecuada para el alcance del reto: una caché en memoria con `node-cache` y un TTL de 10 minutos, complementada con un snapshot persistido en `backend/src/data/fallback-snapshot.json`. Cuando la API externa responde correctamente, el catálogo se guarda en ambas capas. Si la API falla y la caché en memoria no está disponible, el backend lee el último snapshot válido desde disco y continúa entregando los datos al Dashboard. Esta solución evita que la interfaz quede en blanco ante una falla temporal de `fakestoreapi.com`, aunque para producción reemplazaría la caché en memoria por Redis y añadiría un Circuit Breaker.
+En este MVP implementé una solución más simple: una caché en memoria con `node-cache` y un TTL de 10 minutos, complementada por un snapshot persistido en `backend/src/data/fallback-snapshot.json`. Cuando la API responde correctamente, el catálogo se guarda en ambas capas. Si la API falla y la caché en memoria no está disponible, el backend lee el último snapshot válido desde disco y continúa entregando datos al Dashboard. El Circuit Breaker y Redis quedan como mejoras para una versión de producción.
