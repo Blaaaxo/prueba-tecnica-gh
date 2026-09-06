@@ -3,6 +3,7 @@ import { useCatalog } from './hooks/useCatalog';
 import { useMarkupSimulation } from './hooks/useMarkupSimulation';
 import { MarkupSlider } from './components/MarkupSlider';
 import { CategoryGrid } from './components/CategoryGrid';
+import { Top3Grid } from './components/Top3Grid';
 
 function App() {
     const { catalogoBase, loading, error, fuenteDatos } = useCatalog();
@@ -47,6 +48,10 @@ function App() {
                 <CategoryGrid products={catalogoRecalculado} />
             </section>
 
+            <section className="mb-10">
+                <h2 className="text-xl font-semibold mb-4">Top 3 de Oportunidad</h2>
+                <Top3Grid products={catalogoRecalculado} />
+            </section>
 
         </div>
     );
